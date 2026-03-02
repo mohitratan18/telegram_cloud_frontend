@@ -1,65 +1,137 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { api } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import { Loader2 } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import MasonryGrid from "@/components/MasonryGrid";
+import SortDropdown from "@/components/SortDropdown";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function Home() {
+  const [images, setImages] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [sort, setSort] = useState("uploaded_at-desc");
+  const { isAuthenticated } = useAuth();
+
+  const fetchImages = async () => {
+    if (!hasMore && page > 1) return;
+    
+    setLoading(true);
+
+    const [sortBy, order] = sort.split("-");
+
+    try {
+      const res = await api.get(
+        `/images?page=${page}&limit=20&sortBy=${sortBy}&order=${order}`
+      );
+
+      const newImages = res.data.data || [];
+      
+      setImages((prev) =>
+        page === 1 ? newImages : [...prev, ...newImages]
+      );
+
+      if (newImages.length < 20) {
+        setHasMore(false);
+      }
+    } catch (error: any) {
+      if (error?.response?.data?.error?.code === "PGRST103") {
+        setHasMore(false);
+      } else {
+        console.error("Error fetching images:", error);
+      }
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setHasMore(true);
+      fetchImages();
+    }
+  }, [page, sort, isAuthenticated]);
+
+  const handleDelete = async (id: string) => {
+    await api.delete(`/image/${id}`);
+    setImages((prev) => prev.filter((img) => img.id !== id));
+  };
+
+  const observerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loading && hasMore) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 1 }
+    );
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [loading, hasMore]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <ProtectedRoute>
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-1">
+                Gallery
+              </h2>
+              <p className="text-neutral-500 dark:text-neutral-400 text-sm">
+                {images.length} {images.length === 1 ? 'image' : 'images'}
+              </p>
+            </div>
+            <SortDropdown setSort={(value) => {
+              setPage(1);
+              setImages([]);
+              setSort(value);
+            }} />
+          </div>
+
+          {images.length === 0 && !loading ? (
+            <div className="text-center py-20">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
+                <span className="text-4xl">📸</span>
+              </div>
+              <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">
+                No images yet
+              </h3>
+              <p className="text-neutral-500 dark:text-neutral-400 text-sm">
+                Upload your first image to get started
+              </p>
+            </div>
+          ) : (
+            <MasonryGrid images={images} onDelete={handleDelete} />
+          )}
+
+          {loading && (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="animate-spin text-neutral-400" size={28} />
+            </div>
+          )}
+
+          {!hasMore && images.length > 0 && (
+            <div className="text-center py-8 text-neutral-400 text-sm">
+              That's all
+            </div>
+          )}
+
+          <div ref={observerRef} className="h-4"></div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

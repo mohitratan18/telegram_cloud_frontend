@@ -1,36 +1,163 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mohit Vault - Frontend
 
-## Getting Started
+A modern, minimal image gallery application built with Next.js 16, featuring JWT authentication and a clean aesthetic design.
 
-First, run the development server:
+## 🚀 Quick Start
+
+### Local Development
 
 ```bash
+# Install dependencies
+npm install
+
+# Copy environment file
+cp .env.example .env.local
+
+# Update .env.local with your API URL
+# NEXT_PUBLIC_API_URL=http://localhost:5000
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Quick Deploy to Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+See [QUICK_DEPLOY.md](../QUICK_DEPLOY.md) for 5-minute deployment guide.
 
-## Learn More
+## 📁 Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+frontend/
+├── app/
+│   ├── login/          # Login page
+│   ├── page.tsx        # Home/Gallery page
+│   ├── layout.tsx      # Root layout with providers
+│   └── globals.css     # Global styles
+├── components/
+│   ├── ImageCard.tsx   # Image card component
+│   ├── ImageModal.tsx  # Image modal viewer
+│   ├── MasonryGrid.tsx # Grid layout
+│   ├── Navbar.tsx      # Navigation bar
+│   ├── ProtectedRoute.tsx # Auth guard
+│   ├── SortDropdown.tsx   # Sort selector
+│   ├── ThemeToggle.tsx    # Dark mode toggle
+│   └── UploadZone.tsx     # Upload button
+├── lib/
+│   ├── api.ts          # Axios instance with interceptors
+│   ├── auth.tsx        # Auth context provider
+│   ├── config.ts       # Environment configuration
+│   └── utils.ts        # Utility functions
+├── .env.example        # Environment template
+├── .env.local          # Local environment (create this)
+└── vercel.json         # Vercel configuration
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔐 Authentication
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+JWT token-based authentication with:
+- Automatic token validation
+- Token refresh on app load
+- Secure logout with token revocation
+- Protected routes
 
-## Deploy on Vercel
+## 🎨 Features
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- ✨ Minimal, aesthetic design
+- 🌙 Dark mode support
+- 📱 Fully responsive
+- ♾️ Infinite scroll pagination
+- 📤 Image upload
+- 🖼️ Image modal viewer
+- 🗑️ Image management (view, download, delete)
+- 🔄 Sorting options
+- 🔒 Protected routes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🌍 Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `NEXT_PUBLIC_API_URL` | Backend API URL | Yes |
+| `NEXT_PUBLIC_APP_NAME` | Application name | No |
+| `NEXT_PUBLIC_APP_DESCRIPTION` | App description | No |
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **Animations**: Framer Motion
+- **HTTP Client**: Axios
+- **Theme**: next-themes
+- **Icons**: Lucide React
+
+## 📦 Scripts
+
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
+npm run type-check   # TypeScript type checking
+```
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+1. Push code to GitHub
+2. Import project in Vercel
+3. Add environment variables
+4. Deploy
+
+See [DEPLOYMENT.md](../DEPLOYMENT.md) for detailed guide.
+
+### Other Platforms
+
+```bash
+npm run build
+```
+
+Deploy the `.next` folder to your hosting platform.
+
+## 🔧 Configuration
+
+### Development
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
+```
+
+### Production
+```env
+NEXT_PUBLIC_API_URL=https://api.yourdomain.com
+```
+
+## 🐛 Troubleshooting
+
+**Build fails:**
+- Check all environment variables are set
+- Run `npm run build` locally
+- Check Node.js version (>=18.17.0)
+
+**API not connecting:**
+- Verify `NEXT_PUBLIC_API_URL` is correct
+- Check backend CORS settings
+- Ensure backend is accessible
+
+**Images not loading:**
+- Check backend image URLs
+- Verify CORS headers
+
+## 📝 License
+
+MIT
+
+## 🤝 Contributing
+
+Contributions welcome! Please submit a Pull Request.
+
+---
+
+**Need help?** Check [DEPLOYMENT.md](../DEPLOYMENT.md) for full documentation.
+
